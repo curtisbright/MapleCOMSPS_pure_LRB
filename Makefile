@@ -1,7 +1,7 @@
 MROOT := $(shell pwd)
 export MROOT
 
-maplecomsps_static:
+default:
 	make -C simp rs
 	cp simp/minisat_static maplecomsps_static
 
