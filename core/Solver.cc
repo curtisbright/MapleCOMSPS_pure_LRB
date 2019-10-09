@@ -1150,7 +1150,8 @@ lbool Solver::solve_()
     int init = 10000;
     while (status == l_Undef && init > 0 && withinBudget())
        status = search(init);
-    glucose_restart = false;
+    if(status == l_Undef)
+       glucose_restart = false;
 
     // Search:
     int phase_allotment = 100;
@@ -1183,6 +1184,7 @@ lbool Solver::solve_()
         ok = false;
 
     cancelUntil(0);
+    glucose_restart = false;
     return status;
 }
 
