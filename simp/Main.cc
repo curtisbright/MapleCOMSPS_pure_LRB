@@ -86,6 +86,8 @@ int main(int argc, char** argv)
         IntOption    verb   ("MAIN", "verb",   "Verbosity level (0=silent, 1=some, 2=more).", 1, IntRange(0, 2));
         BoolOption   pre    ("MAIN", "pre",    "Completely turn on/off any preprocessing.", true);
         StringOption dimacs ("MAIN", "dimacs", "If given, stop after preprocessing and write the result to this file.");
+        StringOption assumptions ("MAIN", "assumptions", "If given, use the assumptions in the file.");
+        IntOption    to_bound   ("MAIN", "to-bound",   "Bound to stop at", INT32_MAX, IntRange(0, INT32_MAX));
         IntOption    cpu_lim("MAIN", "cpu-lim","Limit on CPU time allowed in seconds.\n", INT32_MAX, IntRange(0, INT32_MAX));
         IntOption    mem_lim("MAIN", "mem-lim","Limit on memory usage in megabytes.\n", INT32_MAX, IntRange(0, INT32_MAX));
         BoolOption   drup   ("MAIN", "drup",   "Generate DRUP UNSAT proof.", false);
@@ -198,10 +200,54 @@ int main(int argc, char** argv)
             exit(0);
         }
 
+        int numsat = 0;
+        lbool ret;
         vec<Lit> dummy;
-        lbool ret = S.solveLimited(dummy);
+        if (assumptions) {
+            const char* file_name = assumptions;
+            FILE* assertion_file = fopen (file_name, "r");
+            if (assertion_file == NULL)
+                printf("ERROR! Could not open file: %s\n", file_name), exit(1);
+            int i = 0;
+            int bound = 0;
+            int tmp = fscanf(assertion_file, "a ");
+            while (fscanf(assertion_file, "%d ", &i) == 1)
+            {
+                if(i==0)
+                {
+                  if(S.verbosity > 0)
+                  {  printf("a ");
+                     for( int i = 0; i < dummy.size(); i++)
+                       printf("%s%d ", sign(dummy[i]) ? "-" : "", var(dummy[i])+1);
+                     printf("0\n");
+                     if(bound > to_bound)
+                       break;
+                     printf("Bound %d: ", bound);
+                  }
+                  ret = S.solveLimited(dummy);
+                  bound++;
+                  if(S.verbosity > 0)
+                    printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+                  dummy.clear();
+                  tmp = fscanf(assertion_file, "a ");
+                  if(ret==l_True)
+                    numsat++;
+                }
+                else
+                {
+                  Var v = abs(i) - 1;
+                  Lit l = i > 0 ? mkLit(v) : ~mkLit(v);
+                  dummy.push(l);
+                }
+            }
+            fclose(assertion_file);
+        }
+        else
+            ret = S.solveLimited(dummy);
         
         if (S.verbosity > 0){
+            if(assumptions)
+	      printf("Number of satisfiable bounds: %d\n", numsat);
             printStats(S);
             printf("\n"); }
         printf(ret == l_True ? "s SATISFIABLE\n" : ret == l_False ? "s UNSATISFIABLE\n" : "s UNKNOWN\n");

@@ -1048,6 +1048,7 @@ lbool Solver::search(int& nof_conflicts)
                 reduceDB(); }
 
             Lit next = lit_Undef;
+	//printf("%d %d\n", decisionLevel(), assumptions.size());
             while (decisionLevel() < assumptions.size()){
                 // Perform user provided assumption:
                 Lit p = assumptions[decisionLevel()];
@@ -1062,6 +1063,7 @@ lbool Solver::search(int& nof_conflicts)
                     break;
                 }
             }
+	//printf("%d %d %d\n", decisionLevel(), assumptions.size(), next == lit_Undef);
 
             if (next == lit_Undef){
                 // New variable decision:
