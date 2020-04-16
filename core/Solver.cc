@@ -1057,6 +1057,8 @@ lbool Solver::search(int& nof_conflicts)
                     newDecisionLevel();
                 }else if (value(p) == l_False){
                     analyzeFinal(~p, conflict);
+                    cancelUntil(0);
+                    addClause_(conflict);
                     return l_False;
                 }else{
                     next = p;
