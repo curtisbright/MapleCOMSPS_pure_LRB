@@ -632,6 +632,11 @@ void SimpSolver::removeSatisfied()
 // It helps solving certain types of huge problems tremendously.
 bool SimpSolver::eliminate(bool turn_off_elim)
 {
+    if (!simplify())
+        return false;
+    else if (!use_simplification)
+        return true;
+
     bool res = true;
     int iter = 0;
     int n_cls, n_cls_init, n_vars;

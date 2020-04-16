@@ -1007,7 +1007,7 @@ lbool Solver::search(int& nof_conflicts)
 
             claDecayActivity();
 
-            /*if (--learntsize_adjust_cnt == 0){
+            if (--learntsize_adjust_cnt == 0){
                 learntsize_adjust_confl *= learntsize_adjust_inc;
                 learntsize_adjust_cnt    = (int)learntsize_adjust_confl;
                 max_learnts             *= learntsize_inc;
@@ -1017,7 +1017,7 @@ lbool Solver::search(int& nof_conflicts)
                            (int)conflicts, 
                            (int)dec_vars - (trail_lim.size() == 0 ? trail.size() : trail_lim[0]), nClauses(), (int)clauses_literals, 
                            (int)max_learnts, nLearnts(), (double)learnts_literals/nLearnts(), progressEstimate()*100);
-            }*/
+            }
 
         }else{
             // NO CONFLICT
