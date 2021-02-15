@@ -167,6 +167,7 @@ int main(int argc, char** argv)
             printStats(S);
             printf("\n"); }
         printf(ret == l_True ? "s SATISFIABLE\n" : ret == l_False ? "s UNSATISFIABLE\n" : "s UNKNOWN\n");
+#ifdef PRINT_SOLUTION
         if (ret == l_True){
             printf("v ");
             for (int i = 0; i < S.nVars(); i++)
@@ -174,6 +175,7 @@ int main(int argc, char** argv)
                     printf("%s%s%d", (i==0)?"":" ", (S.model[i]==l_True)?"":"-", i+1);
             printf(" 0\n");
         }
+#endif
 
         if (res != NULL){
             if (ret == l_True){
