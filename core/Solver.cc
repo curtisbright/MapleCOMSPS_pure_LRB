@@ -1004,6 +1004,9 @@ lbool Solver::search(int& nof_conflicts)
                 fprintf(drup_file, "0\n");
 #endif
             }
+            if(learnt_clause.size() == 1) {
+                printf("Learnt %i\n", (var(learnt_clause[0])+1)*(-2*sign(learnt_clause[0])+1));
+            }
 
             claDecayActivity();
 
