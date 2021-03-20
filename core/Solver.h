@@ -83,6 +83,7 @@ public:
     //
     Solver();
     virtual ~Solver();
+    void addAssumClauses();
 
     // Problem specification:
     //

@@ -202,6 +202,7 @@ int main(int argc, char** argv)
         }
 
         int numsat = 0;
+        S.addAssumClauses();
         lbool ret;
         vec<Lit> dummy;
         if (assumptions) {
@@ -250,7 +251,7 @@ int main(int argc, char** argv)
         
         if (S.verbosity > 0){
             if(assumptions)
-	      printf("Number of satisfiable bounds: %d\n", numsat);
+                printf("Number of satisfiable bounds: %d\n", numsat);
             printStats(S);
             printf("\n"); }
         printf(ret == l_True ? "s SATISFIABLE\n" : ret == l_False ? "s UNSATISFIABLE\n" : "s UNKNOWN\n");

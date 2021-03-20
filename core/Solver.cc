@@ -51,7 +51,7 @@ static BoolOption    opt_rnd_init_act      (_cat, "rnd-init",    "Randomize the 
 static IntOption     opt_restart_first     (_cat, "rfirst",      "The base restart interval", 100, IntRange(1, INT32_MAX));
 static DoubleOption  opt_restart_inc       (_cat, "rinc",        "Restart interval increase factor", 2, DoubleRange(1, false, HUGE_VAL, false));
 static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction of wasted memory allowed before a garbage collection is triggered",  0.20, DoubleRange(0, false, HUGE_VAL, false));
-
+static StringOption  opt_assums            (_cat, "hardassums", "Comma-separated list of assumptions to add as unit clauses.");
 
 //=================================================================================================
 // Constructor/Destructor:
@@ -128,6 +128,26 @@ Solver::~Solver()
 //=================================================================================================
 // Minor methods:
 
+void Solver::addAssumClauses()
+{
+	if (opt_assums)
+	{
+		const char* the_assums = opt_assums;
+		char* tmp = (char*)the_assums;
+		int i = 0;
+		while (sscanf(tmp, "%d", &i) == 1)
+		{
+			Var v = abs(i) - 1;
+			Lit l = i > 0 ? mkLit(v) : ~mkLit(v);
+			//printf("Adding assumption %d\n", var(l)+1);
+			addClause(l);
+			while(*tmp != ',' && *tmp != '\0')
+				tmp++;
+			if(*tmp == ',')
+				tmp++;
+		}
+	}
+}
 
 // Creates a new SAT variable in the solver. If 'decision' is cleared, variable will not be
 // used as a decision variable (NOTE! This has effects on the meaning of a SATISFIABLE result).
