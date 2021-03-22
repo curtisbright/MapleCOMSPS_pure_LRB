@@ -223,6 +223,8 @@ bool Solver::addClause_(vec<Lit>& ps)
         fprintf(drup_file, "0\n");
 #endif
     }
+    //if (i != j && ps.size() == 1)
+    //    printf("Learnt %i\n", (var(ps[0])+1)*(-2*sign(ps[0])+1));
 
     if (ps.size() == 0)
         return ok = false;
@@ -922,6 +924,8 @@ void Solver::safeRemoveSatisfiedCompact(vec<CRef>& cs, unsigned valid_mark)
                 fprintf(drup_file, "0\n");
 #endif
             }
+            if (add_tmp.size() == 1)
+                printf("Learnt %i\n", (var(add_tmp[0])+1)*(-2*sign(add_tmp[0])+1));
             add_tmp.clear();
 
             removeClauseHack(cs[i], c0, c1);
@@ -948,6 +952,8 @@ void Solver::safeRemoveSatisfiedCompact(vec<CRef>& cs, unsigned valid_mark)
             fprintf(drup_file, "0\n");
 #endif
         }
+        if (k != l && c.size() == 1)
+            printf("Learnt %i\n", (var(c[0])+1)*(-2*sign(c[0])+1));
 
         cs[j++] = cs[i];
 NextClause:;
@@ -1489,6 +1495,8 @@ int Solver::stamp(Lit p, int stamp_time, bool use_bin_learnts)
                     fprintf(drup_file, "%i 0\n", (var(~failed) + 1) * (-2 * sign(~failed) + 1));
 #endif
                 }
+                if (value(~failed) != l_True)
+                    printf("Learnt %i\n", (var(~failed) + 1) * (-2 * sign(~failed) + 1));
 
                 if (!(ok = enqueue(~failed)))
                     return -1; // Who cares what?

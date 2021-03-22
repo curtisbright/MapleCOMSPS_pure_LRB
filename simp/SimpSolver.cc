@@ -159,6 +159,8 @@ bool SimpSolver::addClause_(vec<Lit>& ps)
         fprintf(drup_file, "0\n");
 #endif
     }
+    if (!parsing && ps.size() == 1)
+        printf("Learnt %i\n", (var(ps[0])+1)*(-2*sign(ps[0])+1));
 
     if (use_simplification && clauses.size() == nclauses + 1){
         CRef          cr = clauses.last();
