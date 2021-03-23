@@ -91,6 +91,7 @@ int main(int argc, char** argv)
         IntOption    cpu_lim("MAIN", "cpu-lim","Limit on CPU time allowed in seconds.\n", INT32_MAX, IntRange(0, INT32_MAX));
         IntOption    mem_lim("MAIN", "mem-lim","Limit on memory usage in megabytes.\n", INT32_MAX, IntRange(0, INT32_MAX));
         BoolOption   drup   ("MAIN", "drup",   "Generate DRUP UNSAT proof.", false);
+        IntOption    from_bound("MAIN", "from-bound","Start solving from this bound.\n", 0, IntRange(0, INT32_MAX));
         BoolOption   stop_on_sat("MAIN", "stop-on-sat",   "Stop on SAT result.", true);
         StringOption drup_file("MAIN", "drup-file", "DRUP UNSAT proof ouput file.", "");
 
@@ -217,13 +218,15 @@ int main(int argc, char** argv)
             {
                 if(i==0)
                 {
+                  if(bound > to_bound)
+                    break;
+                  if(bound < from_bound)
+                  {  dummy.clear(); bound++; continue; }
                   if(S.verbosity > 0)
                   {  printf("a ");
                      for( int i = 0; i < dummy.size(); i++)
                        printf("%s%d ", sign(dummy[i]) ? "-" : "", var(dummy[i])+1);
                      printf("0\n");
-                     if(bound > to_bound)
-                       break;
                      printf("Bound %d: ", bound);
                   }
                   ret = S.solveLimited(dummy);
