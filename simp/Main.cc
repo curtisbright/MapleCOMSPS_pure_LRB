@@ -218,9 +218,15 @@ int main(int argc, char** argv)
             {
                 if(i==0)
                 {
+                  bool allVarsEliminated = (dummy.size() >= 1);
+                  for(int i = 0; i < dummy.size(); i++)
+                    if(!S.isEliminated(var(dummy[i])))
+                      allVarsEliminated = false;
+                  if(allVarsEliminated && S.verbosity > 0)
+                    printf("All variables in bound %d eliminated; skipping.\n", bound);
                   if(bound > to_bound)
                     break;
-                  if(bound < from_bound)
+                  if(bound < from_bound || allVarsEliminated)
                   {  dummy.clear(); bound++; continue; }
                   if(S.verbosity > 0)
                   {  printf("a ");
