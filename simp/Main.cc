@@ -214,6 +214,7 @@ int main(int argc, char** argv)
             int i = 0;
             int bound = 0;
             int tmp = fscanf(assertion_file, "a ");
+            double last_time = cpuTime();
             while (fscanf(assertion_file, "%d ", &i) == 1)
             {
                 if(i==0)
@@ -233,12 +234,15 @@ int main(int argc, char** argv)
                      for( int i = 0; i < dummy.size(); i++)
                        printf("%s%d ", sign(dummy[i]) ? "-" : "", var(dummy[i])+1);
                      printf("0\n");
-                     printf("Bound %d: ", bound);
+                     printf("Bound: %d\n", bound);
                   }
                   ret = S.solveLimited(dummy);
                   bound++;
-                  if(S.verbosity > 0)
+                  if(S.verbosity > 0) {
                     printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+                    printf("Solved bound %d in %.2f s\n", bound-1, cpuTime() - last_time);
+                  }
+                  last_time = cpuTime();
                   dummy.clear();
                   tmp = fscanf(assertion_file, "a ");
                   if(ret==l_True)
