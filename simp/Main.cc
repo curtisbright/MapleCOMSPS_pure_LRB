@@ -153,6 +153,7 @@ int main(int argc, char** argv)
         parse_DIMACS(in, S);
         gzclose(in);
         FILE* res = (argc >= 3) ? fopen(argv[2], "wb") : NULL;
+        S.addAssumClauses();
 
         if (S.verbosity > 0){
             printf("c |  Number of variables:  %12d                                         |\n", S.nVars());
