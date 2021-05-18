@@ -168,8 +168,40 @@ int main(int argc, char** argv)
         signal(SIGINT, SIGINT_interrupt);
         signal(SIGXCPU,SIGINT_interrupt);
 
+        // Don't eliminate variables that appear in assumptions
+        vec<Var> assms;
+        if (assumptions) {
+            const char* file_name = assumptions;
+            FILE* assertion_file = fopen (file_name, "r");
+            if (assertion_file == NULL)
+                printf("ERROR! Could not open file: %s\n", file_name), exit(1);
+            int i = 0;
+            int bound = 0;
+            int tmp = fscanf(assertion_file, "a ");
+            double last_time = cpuTime();
+            while (fscanf(assertion_file, "%d ", &i) == 1)
+            {
+                if(i!=0)
+                {
+                  Var v = abs(i) - 1;
+                  //Lit l = i > 0 ? mkLit(v) : ~mkLit(v);
+                  assms.push(v);
+                  S.setFrozen(v, true);
+                }
+            }
+            fclose(assertion_file);
+        }
+
         S.parsing = false;
         S.eliminate(true);
+
+        // Unfreeze assumptions
+        if (assumptions) {
+            for (int i = 0; i < assms.size(); i++)
+                S.setFrozen(assms[i], false);
+        }
+        assms.clear();
+
         double simplified_time = cpuTime();
         if (S.verbosity > 0){
             printf("c |  Simplification time:  %12.2f s                                       |\n", simplified_time - parsed_time);
