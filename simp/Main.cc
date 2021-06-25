@@ -93,6 +93,7 @@ int main(int argc, char** argv)
         BoolOption   drup   ("MAIN", "drup",   "Generate DRUP UNSAT proof.", false);
         IntOption    from_bound("MAIN", "from-bound","Start solving from this bound.\n", 0, IntRange(0, INT32_MAX));
         BoolOption   stop_on_sat("MAIN", "stop-on-sat",   "Stop on SAT result.", true);
+        BoolOption   reverse("MAIN", "reverse",   "Search assumptions in reverse", false);
         StringOption drup_file("MAIN", "drup-file", "DRUP UNSAT proof ouput file.", "");
 
         parseOptions(argc, argv, true);
@@ -194,13 +195,25 @@ int main(int argc, char** argv)
 
         S.parsing = false;
         S.eliminate(true);
+        
+        if (reverse) {
+            vec<Var> assms2;
+            for(int i=assms.size()-1; i >= 0; i--) {
+                assms2.push(assms[i]);
+            }
+            assms.clear();
+            assms2.copyTo(assms);
+        }
 
         // Unfreeze assumptions
         if (assumptions) {
             for (int i = 0; i < assms.size(); i++)
+            {   printf("assumption %d\n", i);
                 S.setFrozen(assms[i], false);
+            }
+            printf("size: %d\n", assms.size());
         }
-        assms.clear();
+        //assms.clear();
 
         double simplified_time = cpuTime();
         if (S.verbosity > 0){
@@ -240,57 +253,37 @@ int main(int argc, char** argv)
         lbool ret;
         vec<Lit> dummy;
         if (assumptions) {
-            const char* file_name = assumptions;
-            FILE* assertion_file = fopen (file_name, "r");
-            if (assertion_file == NULL)
-                printf("ERROR! Could not open file: %s\n", file_name), exit(1);
-            int i = 0;
-            int bound = 0;
-            int tmp = fscanf(assertion_file, "a ");
             double last_time = cpuTime();
-            while (fscanf(assertion_file, "%d ", &i) == 1)
+            for (int bound=0;bound < assms.size();bound++)
             {
-                if(i==0)
-                {
-                  bool allVarsEliminated = (dummy.size() >= 1);
-                  for(int i = 0; i < dummy.size(); i++)
-                    if(!S.isEliminated(var(dummy[i])))
+                  bool allVarsEliminated = true;
+                  if(!S.isEliminated(assms[bound]))
                       allVarsEliminated = false;
                   if(allVarsEliminated && S.verbosity > 0)
                     printf("All variables in bound %d eliminated; skipping.\n", bound);
                   if(bound > to_bound)
                     break;
                   if(bound < from_bound || allVarsEliminated)
-                  {  dummy.clear(); bound++; continue; }
+                  {  continue; }
                   if(S.verbosity > 0)
                   {  printf("a ");
-                     for( int i = 0; i < dummy.size(); i++)
-                       printf("%s%d ", sign(dummy[i]) ? "-" : "", var(dummy[i])+1);
+                       printf("%d ", assms[bound]+1);
                      printf("0\n");
                      printf("Bound: %d\n", bound);
                   }
+                  dummy.push(mkLit(assms[bound]));
                   ret = S.solveLimited(dummy);
-                  bound++;
                   if(S.verbosity > 0) {
                     printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
-                    printf("Solved bound %d in %.2f s\n", bound-1, cpuTime() - last_time);
+                    printf("Solved bound %d in %.2f s\n", bound, cpuTime() - last_time);
                   }
                   last_time = cpuTime();
                   dummy.clear();
-                  tmp = fscanf(assertion_file, "a ");
                   if(ret==l_True)
                     numsat++;
                   if(stop_on_sat && ret==l_True)
                     break;
-                }
-                else
-                {
-                  Var v = abs(i) - 1;
-                  Lit l = i > 0 ? mkLit(v) : ~mkLit(v);
-                  dummy.push(l);
-                }
             }
-            fclose(assertion_file);
         }
         else
             ret = S.solveLimited(dummy);
